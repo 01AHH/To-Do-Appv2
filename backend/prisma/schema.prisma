@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums matching the PRD specifications
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  BACKBURNER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum GoalCategory {
+  PERSONAL_GROWTH
+  PROFESSIONAL
+  HEALTH
+  FINANCIAL
+  LEARNING
+  OTHER
+}
+
+// Users table
+model User {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String    @unique @db.VarChar(255)
+  passwordHash  String    @map("password_hash") @db.VarChar(255)
+  name          String?   @db.VarChar(255)
+  avatarUrl     String?   @map("avatar_url") @db.Text
+  preferences   Json      @default("{}")
+  emailVerified Boolean   @default(false) @map("email_verified")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  lastActive    DateTime? @map("last_active")
+
+  // Relations
+  tasks      Task[]
+  goals      Goal[]
+  categories Category[]
+
+  @@map("users")
+}
+
+// Categories table
+model Category {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String   @db.VarChar(255)
+  color       String   @default("#007AFF") @db.VarChar(7)
+  description String?  @db.Text
+  isFavorite  Boolean  @default(false) @map("is_favorite")
+  userId      String   @map("user_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@unique([userId, name])
+  @@map("categories")
+}
+
+// Tasks table with backburner support
+model Task {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title          String     @db.VarChar(500)
+  description    String?    @db.Text
+  status         TaskStatus @default(PENDING)
+  priority       Priority   @default(MEDIUM)
+  dueDate        DateTime?  @map("due_date")
+  backburnerDate DateTime?  @map("backburner_date")
+  completedAt    DateTime?  @map("completed_at")
+  position       Int        @default(0)
+  estimatedHours Decimal?   @map("estimated_hours") @db.Decimal(5, 2)
+  actualHours    Decimal?   @map("actual_hours") @db.Decimal(5, 2)
+  tags           String[]   @default([])
+  userId         String     @map("user_id") @db.Uuid
+  categoryId     String?    @map("category_id") @db.Uuid
+  parentTaskId   String?    @map("parent_task_id") @db.Uuid
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  parentTask Task?     @relation("TaskHierarchy", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  subtasks   Task[]    @relation("TaskHierarchy")
+
+  @@map("tasks")
+}
+
+// Goals table
+model Goal {
+  id                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title              String        @db.VarChar(500)
+  description        String?       @db.Text
+  category           GoalCategory  @default(OTHER)
+  targetDate         DateTime?     @map("target_date")
+  progressPercentage Int           @default(0) @map("progress_percentage")
+  isCompleted        Boolean       @default(false) @map("is_completed")
+  userId             String        @map("user_id") @db.Uuid
+  parentGoalId       String?       @map("parent_goal_id") @db.Uuid
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentGoal Goal?  @relation("GoalHierarchy", fields: [parentGoalId], references: [id], onDelete: Cascade)
+  subgoals   Goal[] @relation("GoalHierarchy")
+
+  @@map("goals")
+}
+
+// Indexes for performance optimization (as specified in PRD)
+// Note: Prisma automatically creates indexes for foreign keys and unique constraints
