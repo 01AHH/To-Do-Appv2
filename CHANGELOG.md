@@ -4,12 +4,49 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Added
-- Initial project setup
-- Code review analysis and vulnerability assessment
+
+### Changes to make as of the 21st August 2025 
+
+  Update Todos
+  ⎿  ☐ Install Vitest & React Testing Library for frontend testing    
+     ☐ Install Jest & Supertest for backend API testing
+     ☐ Create vitest.config.ts with React environment and path aliases
+     ☐ Create jest.config.js with TypeScript and database support
+     ☐ Update TypeScript configs to include test files
+     ☐ Create test setup files with global configurations
+     ☐ Add comprehensive test scripts to package.json
+     ☐ Configure Mock Service Worker (MSW) for API mocking
+     ☐ Create test database utilities with setup/teardown
+     ☐ Refactor API service to remove tight Zustand coupling
+     ☐ Create example test files to validate infrastructure
 
 
-These issues have been idenitifed as of 20th August 2025 at 8:39am 
+
+### Added @21st August 2025
+- Full-stack TypeScript To-Do Application (FocusFlow)
+  - React-based frontend with TypeScript and Vite
+  - Node.js backend with Express and Prisma ORM
+  - Comprehensive authentication system with JWT
+
+- Core Application Components
+  - User Authentication (Login/Register)
+  - Task Management System
+  - Categories and Goals Tracking
+  - Responsive UI with Tailwind CSS
+
+- Project Infrastructure
+  - TypeScript monorepo setup
+  - Environment configuration management
+  - Prisma database schema
+  - Comprehensive security configurations
+
+- Initial Security Assessment
+  - Comprehensive code review
+  - Vulnerability assessment
+  - Detailed security risk identification
+
+
+These issues have been identified as of 20th August 2025 at 8:39am 
 ### Security Issues Identified (Requires Immediate Attention)
 #### 🚨 CRITICAL VULNERABILITIES
 - **CRIT-001**: Insecure JWT Secret Configuration (`backend/src/utils/auth.ts:5-6`)
